@@ -1,0 +1,204 @@
+const { ethers } = require("hardhat");
+const fs = require("fs");
+const path = require("path");
+
+/**
+ * Deployment script for Blockchain-Based Plant Care Social Network
+ * This script deploys the Project contract and saves deployment information
+ */
+
+async function main() {
+  console.log("🌱 Starting deployment of Blockchain-Based Plant Care Social Network...\n");
+
+  // Get the signers (accounts)
+  const [deployer, user1, user2] = await ethers.getSigners();
+  
+  console.log("📋 Deployment Details:");
+  console.log("==========================================");
+  console.log(`Deployer Address: ${deployer.address}`);
+  console.log(`Deployer Balance: ${ethers.utils.formatEther(await deployer.getBalance())} ETH`);
+  console.log(`Network: ${network.name}`);
+  console.log(`Chain ID: ${network.config.chainId || 'localhost'}`);
+  console.log("==========================================\n");
+
+  // Check if deployer has enough balance
+  const balance = await deployer.getBalance();
+  const minimumBalance = ethers.utils.parseEther("0.1");
+  
+  if (balance.lt(minimumBalance)) {
+    console.error("❌ Insufficient balance for deployment!");
+    console.error(`Required: ${ethers.utils.formatEther(minimumBalance)} ETH`);
+    console.error(`Available: ${ethers.utils.formatEther(balance)} ETH`);
+    process.exit(1);
+  }
+
+  try {
+    // Get the contract factory
+    console.log("🔧 Compiling contracts...");
+    const ProjectFactory = await ethers.getContractFactory("Project");
+    
+    // Deploy the contract
+    console.log("🚀 Deploying Project contract...");
+    const deploymentStartTime = Date.now();
+    
+    const project = await ProjectFactory.deploy();
+    
+    // Wait for deployment to complete
+    await project.deployed();
+    
+    const deploymentEndTime = Date.now();
+    const deploymentTime = (deploymentEndTime - deploymentStartTime) / 1000;
+    
+    console.log("✅ Project contract deployed successfully!\n");
+    
+    // Display deployment information
+    console.log("📊 Deployment Information:");
+    console.log("==========================================");
+    console.log(`Contract Address: ${project.address}`);
+    console.log(`Transaction Hash: ${project.deployTransaction.hash}`);
+    console.log(`Block Number: ${project.deployTransaction.blockNumber}`);
+    console.log(`Gas Used: ${project.deployTransaction.gasLimit.toString()}`);
+    console.log(`Gas Price: ${ethers.utils.formatUnits(project.deployTransaction.gasPrice, 'gwei')} gwei`);
+    console.log(`Deployment Time: ${deploymentTime.toFixed(2)} seconds`);
+    console.log("==========================================\n");
+
+    // Verify contract deployment by calling a read function
+    console.log("🔍 Verifying contract deployment...");
+    
+    try {
+      const totalPlants = await project.getTotalPlants();
+      const totalRequests = await project.getTotalRequests();
+      const minimumStake = await project.MINIMUM_STAKE();
+      const maxHealthPoints = await project.MAX_HEALTH_POINTS();
+      
+      console.log("✅ Contract verification successful!");
+      console.log(`Initial Total Plants: ${totalPlants.toString()}`);
+      console.log(`Initial Total Requests: ${totalRequests.toString()}`);
+      console.log(`Minimum Stake: ${ethers.utils.formatEther(minimumStake)} ETH`);
+      console.log(`Max Health Points: ${maxHealthPoints.toString()}`);
+      console.log();
+      
+    } catch (error) {
+      console.error("❌ Contract verification failed:", error.message);
+      process.exit(1);
+    }
+
+    // Save deployment information to file
+    const deploymentInfo = {
+      networkName: network.name,
+      chainId: network.config.chainId || 31337,
+      contractAddress: project.address,
+      deployerAddress: deployer.address,
+      transactionHash: project.deployTransaction.hash,
+      blockNumber: project.deployTransaction.blockNumber,
+      gasUsed: project.deployTransaction.gasLimit.toString(),
+      gasPrice: project.deployTransaction.gasPrice.toString(),
+      deploymentTimestamp: new Date().toISOString(),
+      deploymentTime: deploymentTime,
+      contractConstants: {
+        minimumStake: minimumStake.toString(),
+        maxHealthPoints: maxHealthPoints.toString()
+      }
+    };
+
+    // Create deployments directory if it doesn't exist
+    const deploymentsDir = path.join(__dirname, 'deployments');
+    if (!fs.existsSync(deploymentsDir)) {
+      fs.mkdirSync(deploymentsDir, { recursive: true });
+    }
+
+    // Save deployment info to JSON file
+    const deploymentFileName = `deployment-${network.name}-${Date.now()}.json`;
+    const deploymentFilePath = path.join(deploymentsDir, deploymentFileName);
+    
+    fs.writeFileSync(deploymentFilePath, JSON.stringify(deploymentInfo, null, 2));
+    console.log(`📄 Deployment information saved to: ${deploymentFilePath}`);
+
+    // Save ABI for frontend integration
+    const contractABI = ProjectFactory.interface.format(ethers.utils.FormatTypes.json);
+    const abiFileName = `Project-ABI-${network.name}.json`;
+    const abiFilePath = path.join(deploymentsDir, abiFileName);
+    
+    fs.writeFileSync(abiFilePath, contractABI);
+    console.log(`📄 Contract ABI saved to: ${abiFilePath}`);
+
+    // Optional: Perform initial setup transactions
+    console.log("\n🔧 Performing initial setup...");
+    
+    // Register deployer as a plant sitter for testing
+    try {
+      console.log("Registering deployer as a plant sitter...");
+      const registerTx = await project.registerAsSitter("Admin Plant Sitter", {
+        value: minimumStake
+      });
+      await registerTx.wait();
+      console.log("✅ Deployer registered as plant sitter");
+      
+      // Register a test plant
+      console.log("Registering a test plant...");
+      const plantTx = await project.registerPlant(
+        "Test Monstera",
+        "Monstera Deliciosa",
+        7, // Care every 7 days
+        "This is a test plant for demonstration purposes"
+      );
+      await plantTx.wait();
+      console.log("✅ Test plant registered");
+      
+    } catch (error) {
+      console.log("⚠️  Initial setup failed (this is optional):", error.message);
+    }
+
+    // Display usage instructions
+    console.log("\n🎉 DEPLOYMENT COMPLETE! 🎉");
+    console.log("==========================================");
+    console.log("📝 Next Steps:");
+    console.log("1. Save the contract address for frontend integration");
+    console.log("2. Verify the contract on block explorer (if on testnet/mainnet)");
+    console.log("3. Update your frontend configuration with the new address");
+    console.log("4. Test the contract functions using hardhat console or frontend");
+    console.log("==========================================");
+
+    console.log("\n🔗 Contract Interaction Examples:");
+    console.log("==========================================");
+    console.log("// Connect to the contract");
+    console.log(`const contract = await ethers.getContractAt("Project", "${project.address}");`);
+    console.log("");
+    console.log("// Register a plant");
+    console.log('await contract.registerPlant("My Plant", "Plant Species", 7, "Care notes");');
+    console.log("");
+    console.log("// Register as sitter");
+    console.log(`await contract.registerAsSitter("Your Name", { value: ethers.utils.parseEther("0.01") });`);
+    console.log("");
+    console.log("// Provide plant care");
+    console.log('await contract.providePlantCare(1, "Watered and checked leaves");');
+    console.log("==========================================\n");
+
+  } catch (error) {
+    console.error("❌ Deployment failed:", error);
+    
+    // Log additional error details
+    if (error.transaction) {
+      console.error("Transaction Hash:", error.transaction.hash);
+    }
+    if (error.receipt) {
+      console.error("Gas Used:", error.receipt.gasUsed.toString());
+    }
+    
+    process.exit(1);
+  }
+}
+
+// Handle script execution
+main()
+  .then(() => {
+    console.log("🌿 Deployment script completed successfully!");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("💥 Deployment script failed:", error);
+    process.exit(1);
+  });
+
+// Export the main function for testing
+module.exports = { main };
