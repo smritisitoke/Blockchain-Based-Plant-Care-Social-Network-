@@ -1,0 +1,153 @@
+{
+  "name": "blockchain-based-plant-care-social-network",
+  "version": "1.0.0",
+  "description": "A decentralized platform for plant care management and community support where users can register plants as NFTs, request plant sitting services, and build a supportive community of plant enthusiasts.",
+  "main": "deploy.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run deploy.js",
+    "deploy:localhost": "hardhat run deploy.js --network localhost",
+    "deploy:sepolia": "hardhat run deploy.js --network sepolia",
+    "deploy:mainnet": "hardhat run deploy.js --network mainnet",
+    "deploy:polygon": "hardhat run deploy.js --network polygon",
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage",
+    "test:gas": "REPORT_GAS=true hardhat test",
+    "node": "hardhat node",
+    "console": "hardhat console",
+    "clean": "hardhat clean",
+    "verify": "hardhat verify",
+    "verify:sepolia": "hardhat verify --network sepolia",
+    "verify:mainnet": "hardhat verify --network mainnet",
+    "size": "hardhat size-contracts",
+    "flatten": "hardhat flatten",
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "docs": "hardhat docgen",
+    "analyze": "slither contracts/",
+    "start": "npm run node",
+    "dev": "npm run compile && npm run deploy:localhost",
+    "build": "npm run clean && npm run compile",
+    "prepare": "husky install"
+  },
+  "keywords": [
+    "blockchain",
+    "solidity",
+    "ethereum",
+    "smart-contracts",
+    "plant-care",
+    "social-network",
+    "nft",
+    "defi",
+    "web3",
+    "dapp",
+    "hardhat",
+    "plant-sitting",
+    "community",
+    "incentivized",
+    "decentralized"
+  ],
+  "author": {
+    "name": "Plant Care Network Team",
+    "email": "team@plantcarenetwork.io",
+    "url": "https://plantcarenetwork.io"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/plantcare/blockchain-plant-care-network.git"
+  },
+  "bugs": {
+    "url": "https://github.com/plantcare/blockchain-plant-care-network/issues"
+  },
+  "homepage": "https://plantcarenetwork.io",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "@nomiclabs/hardhat-waffle": "^2.0.6",
+    "@typechain/ethers-v5": "^10.2.1",
+    "@typechain/hardhat": "^6.1.6",
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.3.1",
+    "chai": "^4.3.7",
+    "dotenv": "^16.1.4",
+    "eslint": "^8.43.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "ethereum-waffle": "^4.0.10",
+    "hardhat": "^2.17.0",
+    "hardhat-contract-sizer": "^2.10.0",
+    "hardhat-deploy": "^0.11.30",
+    "hardhat-gas-reporter": "^1.0.9",
+    "hardhat-docgen": "^1.3.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
+    "prettier": "^2.8.8",
+    "prettier-plugin-solidity": "^1.1.3",
+    "solhint": "^3.4.1",
+    "solidity-coverage": "^0.8.2",
+    "ts-node": "^10.9.1",
+    "typechain": "^8.2.0",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.2",
+    "ethers": "^5.7.2"
+  },
+  "peerDependencies": {
+    "hardhat": "^2.17.0"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.sol": [
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run test"
+    }
+  },
+  "config": {
+    "solidity": {
+      "version": "0.8.19",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      }
+    }
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/plantcare"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "contracts/**/*",
+    "deploy.js",
+    "deployments/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "directories": {
+    "contracts": "./contracts",
+    "test": "./test",
+    "deployments": "./deployments"
+  }
+}
